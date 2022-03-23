@@ -74,7 +74,7 @@ function list_data(){
 		$group_user = $user_profil_arr['group'];
 	}
 	
-	if ($group_user==1) {
+	//if ($group_user==1) {
 	?>
     
    	<table id="datable_1" class="table table-bordered table-striped table-sm w-100">
@@ -125,21 +125,24 @@ function list_data(){
 			$tot = array();
 			while ($row = mysqli_fetch_array($query)){
 				$id_organisasi = $row['id_organisasi'];
+				$profil_arr = get_profilorg($id_organisasi);
+				
+				if ($profil_arr['tampil']==1) {
 				?>
-				<tr>
+					<tr>
 					<td><?php echo $row['nama_organisasi']; ?></td>
-			<?php
-				for($ii=0;$ii<$jml_periode;$ii++) {
-					$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);
-					$tot[$ii] = $tot[$ii] + $nilai;	
-					?>
-                    <td align="center"><?php echo number_format($nilai,2,",","."); ?></td>
-                    <?php	
-				}
+				<?php
+                    for($ii=0;$ii<$jml_periode;$ii++) {
+                        $nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);
+                        $tot[$ii] = $tot[$ii] + $nilai;	
+                        ?>
+                        <td align="center"><?php echo number_format($nilai,2,",","."); ?></td>
+                        <?php	
+                    }
 			?>
-               </tr>
+               	</tr>
               <?php 
-					
+				}	
 				$j++;
 			}
 			?>
@@ -161,7 +164,7 @@ function list_data(){
     <br />
     
     <?php 
-	} 
+	//} 
 	
 	
 	if ($_SESSION['km_profil']==1) { 
@@ -171,7 +174,7 @@ function list_data(){
 		$group_user = $user_profil_arr['group'];
 	}
 	
-	if ($group_user==2) {
+	//if ($group_user==2) {
 	?>
      <br />
    	<table id="datable_2" class="table table-bordered table-striped table-sm w-100">
@@ -221,22 +224,25 @@ function list_data(){
 			$j = 1;
 			$tot2 = array();
 			while ($row = mysqli_fetch_array($query)){
-				$id_organisasi = $row['id_organisasi'];
-				?>
-				<tr>
-					<td><?php echo $row['nama_organisasi']; ?></td>
-			<?php
-				for($ii=0;$ii<$jml_periode;$ii++) {	
-					$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);	
-					$tot2[$ii] = $tot2[$ii] + $nilai;	
+				$id_organisasi = $row['id_organisasi'];				
+				$profil_arr = get_profilorg($id_organisasi);
+				
+				if ($profil_arr['tampil']==1) {				
 					?>
-                    <td align="center"><?php  echo number_format($nilai,2,",","."); ?></td>
-                    <?php	
-				}
-			?>
-               </tr>
-              <?php 
-					
+					<tr>
+						<td><?php echo $row['nama_organisasi']; ?></td>
+				<?php
+					for($ii=0;$ii<$jml_periode;$ii++) {	
+						$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);	
+						$tot2[$ii] = $tot2[$ii] + $nilai;	
+						?>
+						<td align="center"><?php  echo number_format($nilai,2,",","."); ?></td>
+						<?php	
+					}
+				?>
+				   </tr>
+				  <?php 
+				}		
 				$j++;
 			}
 			?>
@@ -256,7 +262,7 @@ function list_data(){
     </table>
                         
 <?php  
-	}
+//	}
 	 
 }
      

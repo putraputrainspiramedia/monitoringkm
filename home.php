@@ -26,6 +26,8 @@ function list_data() {
 		$where_group = " where a.id_group = '".$user_profil_arr['group']."'";
 	}
 
+	
+		
 ?>
 	<script language="javascript">
 		
@@ -193,16 +195,20 @@ function list_data() {
                                $qry_pil = mysqli_query($conn,"select a.id_organisasi, a.nama_organisasi 
 																from p_organisasi a
 																inner join p_group b on a.id_group = b.id_group
-																".$where_group."
 																order by a.nama_organisasi");
                                 while ($dt_pil = mysqli_fetch_array($qry_pil)) {
-                                    $pos = strpos(str_replace(" ","",strtoupper($dt_pil['nama_organisasi'])),"REG4");
-                                    if ($pos===false) {
-                                        $select = "";
-                                    } else {
-                                        $select = "selected";
-                                    }
-                                    echo "<option value='".$dt_pil['id_organisasi']."' $select>".$dt_pil['nama_organisasi']."</option>";
+                                    $idg = $dt_pil['id_organisasi'];
+									$profil_arr = get_profilorg($idg);
+	
+									if ($profil_arr['tampil']==1) {
+										$pos = strpos(str_replace(" ","",strtoupper($dt_pil['nama_organisasi'])),"REG4");
+										if ($pos===false) {
+											$select = "";
+										} else {
+											$select = "selected";
+										}										
+										echo "<option value='".$dt_pil['id_organisasi']."' $select>".$dt_pil['nama_organisasi']."</option>";
+									}
                                 }
                             ?>
                         </select>
@@ -219,19 +225,21 @@ function list_data() {
                             </select>
                         </div>-->
                         <div class="col-md-3 form-group">
-                            <button type="button" class="btn btn-info" id="kirim" name="kirim">Cari Data</button>
-                              <button type="button" class="btn btn-success" name="excel" id="excel">Export Excel</button>                       
+                            <button type="button" class="btn btn-info" id="kirim" name="kirim">Cari</button>
+                              <button type="button" class="btn btn-success" name="excel" id="excel">Export</button>   
                         </div> 
                         <div class="col-md-3 form-group">
-                        	 <div id="loading_dealer2" align="center">
-                        		<img src="img/loading.gif" />
-                              </div>
-                               <h1><span class="badge badge-primary" id="totalscore">Total Score : 0</span></h1> 
+                        	  <h1><span class="badge badge-primary" id="totalscore">Total Score : 0</span></h1> 
                         </div>
                     </div>
             </div>
         </div>
         </form>
+        
+         <div id="loading_dealer2" align="center">
+            <img src="img/loading.gif" />
+          </div>
+         
         
         <div class="row">
             <div class="col-sm">

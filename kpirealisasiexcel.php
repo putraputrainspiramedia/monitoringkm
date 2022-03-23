@@ -80,125 +80,129 @@ if (empty($_REQUEST['tahun'])) {
 	$tahun = $_REQUEST['tahun'];
 }
 $id_organisasi = $_REQUEST['organisasi'];
+$profil_arr = get_profilorg($id_organisasi);
 
-$stmt_bsc = mysqli_query($conn,"select id_bsc_perspective, nama_bsc_perspective, nilai
-								from p_bsc_perspective ");
-$ino = 1;
-$arr_bobotbsc = array();
-$bobot_perbsc = 0;
-while ($row_bsc = mysqli_fetch_array($stmt_bsc)) {			
+if ($profil_arr['tampil']==1) {
 	
-	$i=0;
-	$j++;
-
-	$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino);
-	$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row_bsc['nama_bsc_perspective']);
-	$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
-	$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+	$stmt_bsc = mysqli_query($conn,"select id_bsc_perspective, nama_bsc_perspective, nilai
+									from p_bsc_perspective ");
+	$ino = 1;
+	$arr_bobotbsc = array();
+	$bobot_perbsc = 0;
+	while ($row_bsc = mysqli_fetch_array($stmt_bsc)) {			
 		
-	for($ii=0;$ii<$jml_periode;$ii++) { 
-		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
-		$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	}
-
-   
-   $stmt = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
-			IFNULL(a.rumus,'') rumus, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, d.id_organisasi, d.tahun,
-			(select count(*) from kpi x where x.parent = a.id_kpi ) jml_child, a.satuan
-			from kpi a
-			inner join kpi_organisasi d on a.id_kpi = d.id_kpi
-			left join user_app b on d.id_user_input = b.id_user
-			where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '0'
-			and d.id_organisasi = '".$id_organisasi."' and d.tahun = '".$tahun."'
-			order by a.parent, a.urutan";
-	
-	//echo "<pre>$stmt</pre>";
-	$query = mysqli_query($conn,$stmt);
-	
-	$jno = 1;
-	while ($row = mysqli_fetch_array($query)){
 		$i=0;
 		$j++;
-		
-		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino.". ".$jno);
+	
+		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino);
 		$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['nama_kpi']);
+		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row_bsc['nama_bsc_perspective']);
 		$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['satuan']);
+		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
 		$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-
+			
 		for($ii=0;$ii<$jml_periode;$ii++) { 
 			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
 			$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
 		}
-		//child($row['id_bsc_perspective'], $row['id_kpi'], $ino.".".$jno, $row['id_organisasi'],$tahun, $jml_periode, $arr_periode, $i, $j);
+	
+	   
+	   $stmt = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
+				IFNULL(a.rumus,'') rumus, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, d.id_organisasi, d.tahun,
+				(select count(*) from kpi x where x.parent = a.id_kpi ) jml_child, a.satuan
+				from kpi a
+				inner join kpi_organisasi d on a.id_kpi = d.id_kpi
+				left join user_app b on d.id_user_input = b.id_user
+				where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '0'
+				and d.id_organisasi = '".$id_organisasi."' and d.tahun = '".$tahun."'
+				order by a.parent, a.urutan";
 		
-		 $stmtx = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
-						IFNULL(a.rumus,'') rumus, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, d.id_organisasi, d.tahun,	a.satuan,					
-						(select count(*) from kpi x where x.parent = a.id_kpi ) jml_child
-						from kpi a
-						inner join kpi_organisasi d on a.id_kpi = d.id_kpi
-						left join user_app b on d.id_user_input = b.id_user
-						where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '".$row['id_kpi']."'
-						and d.id_organisasi = '".$id_organisasi."' and d.tahun = '".$tahun."'
-						order by a.parent, a.urutan";
-					
-		$queryx = mysqli_query($conn,$stmtx);
+		//echo "<pre>$stmt</pre>";
+		$query = mysqli_query($conn,$stmt);
 		
-		$kno = 1;
-		while ($rowx = mysqli_fetch_array($queryx)){
-				
+		$jno = 1;
+		while ($row = mysqli_fetch_array($query)){
 			$i=0;
 			$j++;
 			
-			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino.". ".$jno. ". ".$kno);
+			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino.". ".$jno);
 			$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $rowx['nama_kpi']);
+			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['nama_kpi']);
 			$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $rowx['satuan']);
+			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['satuan']);
 			$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+	
 			for($ii=0;$ii<$jml_periode;$ii++) { 
 				$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
 				$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
 			}
-			$arr_child = child($rowx['id_bsc_perspective'], $rowx['id_kpi'], $ino.".".$j,$rowx['id_organisasi'], $tahun, $jml_periode, $arr_periode);
+			//child($row['id_bsc_perspective'], $row['id_kpi'], $ino.".".$jno, $row['id_organisasi'],$tahun, $jml_periode, $arr_periode, $i, $j);
 			
-			$jml_child = count($arr_child);
+			 $stmtx = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
+							IFNULL(a.rumus,'') rumus, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, d.id_organisasi, d.tahun,	a.satuan,					
+							(select count(*) from kpi x where x.parent = a.id_kpi ) jml_child
+							from kpi a
+							inner join kpi_organisasi d on a.id_kpi = d.id_kpi
+							left join user_app b on d.id_user_input = b.id_user
+							where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '".$row['id_kpi']."'
+							and d.id_organisasi = '".$id_organisasi."' and d.tahun = '".$tahun."'
+							order by a.parent, a.urutan";
+						
+			$queryx = mysqli_query($conn,$stmtx);
 			
-			if($jml_child>0) {
-				$lno = 1;
-				for ($xc=0;$xc<$jml_child;$xc++) {
-					$arr_child_pecah = explode("###",$arr_child[$xc]);
+			$kno = 1;
+			while ($rowx = mysqli_fetch_array($queryx)){
 					
-					$i=0;
-					$j++;
-					
-					$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino.". ".$jno. ". ".$kno. ". ".$lno);
+				$i=0;
+				$j++;
+				
+				$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino.". ".$jno. ". ".$kno);
+				$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+				$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $rowx['nama_kpi']);
+				$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+				$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $rowx['satuan']);
+				$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+				for($ii=0;$ii<$jml_periode;$ii++) { 
+					$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
 					$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-					$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $arr_child_pecah[0]);
-					$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-					$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $arr_child_pecah[1]);
-					$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-					for($ii=0;$ii<$jml_periode;$ii++) { 
-						$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
-						$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-					}
-					$lno++;
-					
 				}
-			}
-			
-			$kno++;
-		}	
-		$jno++;
+				$arr_child = child($rowx['id_bsc_perspective'], $rowx['id_kpi'], $ino.".".$j,$rowx['id_organisasi'], $tahun, $jml_periode, $arr_periode);
+				
+				$jml_child = count($arr_child);
+				
+				if($jml_child>0) {
+					$lno = 1;
+					for ($xc=0;$xc<$jml_child;$xc++) {
+						$arr_child_pecah = explode("###",$arr_child[$xc]);
+						
+						$i=0;
+						$j++;
+						
+						$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $ino.". ".$jno. ". ".$kno. ". ".$lno);
+						$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+						$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $arr_child_pecah[0]);
+						$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+						$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $arr_child_pecah[1]);
+						$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+						for($ii=0;$ii<$jml_periode;$ii++) { 
+							$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, '');
+							$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+						}
+						$lno++;
+						
+					}
+				}
+				
+				$kno++;
+			}	
+			$jno++;
+		}
+	   
+	   
+		$ino++;
 	}
-   
-   
-	$ino++;
-}
 
+}
 
 $tgl = date("Ymd_His");
 $filename = "kpirealisasi".$tahun;

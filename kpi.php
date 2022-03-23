@@ -115,7 +115,7 @@ function list_data() {
 		}		 
 		<?php } ?>
 		 <?php if ($_SESSION['km_user_delete']==1) { ?>   		
-		function hapusdata(id,idbc, idparent,  nama, terbalik, urutan, satuan, realisasi, score){
+		function hapusdata(id,idbc, idparent,  nama, terbalik, urutan, satuan, realisasi, score, status){
 			$("#hapus2").show();
 			$("#simpan").hide();
 			$("#id").val(id);
@@ -150,6 +150,12 @@ function list_data() {
 					$("#score").val(score);
 				}
 			});
+			$('#status option').each(function() {
+				if($(this).val() == status) {
+					$('#status').prop("selected", true);
+					$("#status").val(status);
+				}
+			});
 			
 			$("#parent").hide();
 			var perspective = $("#perspective").val();
@@ -181,7 +187,7 @@ function list_data() {
 		<?php } ?>
 		
 		 <?php if ($_SESSION['km_user_edit']==1) { ?>
-   		function editdata(id, idbc, idparent,  nama, terbalik, urutan,satuan, realisasi, score){		
+   		function editdata(id, idbc, idparent,  nama, terbalik, urutan,satuan, realisasi, score, status){		
 			$("#hapus2").hide();
 			$("#simpan").show();
 			$("#id").val(id);
@@ -215,6 +221,12 @@ function list_data() {
 				if($(this).val() == score) {
 					$('#score').prop("selected", true);
 					$("#score").val(score);
+				}
+			});
+			$('#status option').each(function() {
+				if($(this).val() == status) {
+					$('#status').prop("selected", true);
+					$("#status").val(status);
 				}
 			});
 			
@@ -296,13 +308,14 @@ function list_data() {
 				var perspective =  $('#perspective option:selected').val();
 				var realisasi =  $('#realisasi option:selected').val();
 				var score =  $('#score option:selected').val();
+				var status =  $('#status option:selected').val();
 				
 				$("#load2").fadeIn(400).html('<img src="./img/loading.gif" align="absmiddle"> <span class="loading">Loading ...</span>');
 				
 				if (id!='') {
-					var datane = 'tp=edit&nama='+nama+'&id='+id+'&urutan='+urutan+'&parent='+parent+'&perspective='+perspective+'&terbalik='+terbalik+'&satuan='+satuan+'&realisasi='+realisasi+'&score='+score;
+					var datane = 'tp=edit&nama='+nama+'&id='+id+'&urutan='+urutan+'&parent='+parent+'&perspective='+perspective+'&terbalik='+terbalik+'&satuan='+satuan+'&realisasi='+realisasi+'&score='+score+'&status='+status;
 				} else {
-					var datane = 'tp=input&nama='+nama+'&urutan='+urutan+'&parent='+parent+'&perspective='+perspective+'&terbalik='+terbalik+'&satuan='+satuan+'&realisasi='+realisasi+'&score='+score;
+					var datane = 'tp=input&nama='+nama+'&urutan='+urutan+'&parent='+parent+'&perspective='+perspective+'&terbalik='+terbalik+'&satuan='+satuan+'&realisasi='+realisasi+'&score='+score+'&status='+status;
 				}
 				$.ajax({
 					type	: "POST",
@@ -341,6 +354,7 @@ function list_data() {
 						$("#perspective").val('');
 						$("#realisasi").val('');
 						$("#score").val('');
+						$("#status").val('');
 						//tinymce.activeEditor.setContent('');
 			
 						$('#InputModalForms').modal('hide');
@@ -392,6 +406,7 @@ function list_data() {
 						$("#perspective").val('');
 						$("#realisasi").val('');
 						$("#score").val('');
+						$("#status").val('');
 						//tinymce.activeEditor.setContent('');
 						$('#InputModalForms').modal('hide');
 						$("#load2").fadeOut('fast');
@@ -502,6 +517,13 @@ function list_data() {
                         <div class="form-group">
                             <label>Urutan</label>
                             <input type="text" class="form-control mb-6" id="urutan" placeholder="urutan" name="urutan" maxlength="3">
+                       </div>
+                         <div class="form-group">
+                            <label>Status</label>
+                            <select name="status" id="status" class="form-control">
+                            	<option value="0">Tidak Aktif</option>
+                                <option value="1">Aktif</option>
+                            </select>
                        </div>
                        <div class="form-group">
                        		<label>&nbsp;</label><br />

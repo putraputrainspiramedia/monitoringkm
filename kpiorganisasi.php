@@ -451,6 +451,7 @@ function input_data() {
                                    $stmt = "select distinct a.id_kpi, a.nama_kpi, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, a.satuan
                                             from kpi a
                                                 where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '0'
+												and a.status = '1'
                                                 order by a.parent, a.urutan";
                                    // echo "<pre>$stmt</pre>";
                                     $query = mysqli_query($conn,$stmt);

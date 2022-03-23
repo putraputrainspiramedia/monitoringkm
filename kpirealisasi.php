@@ -211,20 +211,25 @@ function list_data() {
 									$qry_pil = mysqli_query($conn,"select a.id_organisasi, a.nama_organisasi 
 																from p_organisasi a
 																inner join p_group b on a.id_group = b.id_group
-																$where_group
 																order by a.nama_organisasi");
 									while ($dt_pil = mysqli_fetch_array($qry_pil)) {
 										$id_organisasi = $dt_pil['id_organisasi'];
-										//$pos = strpos(str_replace(" ","",strtoupper($dt_pil['nama_organisasi'])),"REG4");
-										//if ($pos===false) {
-										//	$select = "";
-										//} else 
-										if ($id_organisasi==$id_organisasi_user) {
-											$select = "selected";
-										} else {
-											$select = "";
+										$idg = $dt_pil['id_organisasi'];
+										$profil_arr = get_profilorg($idg);
+		
+										if ($profil_arr['tampil']==1) {
+											
+											//$pos = strpos(str_replace(" ","",strtoupper($dt_pil['nama_organisasi'])),"REG4");
+											//if ($pos===false) {
+											//	$select = "";
+											//} else 
+											if ($id_organisasi==$id_organisasi_user) {
+												$select = "selected";
+											} else {
+												$select = "";
+											}
+											echo "<option value='".$dt_pil['id_organisasi']."' $select>".$dt_pil['nama_organisasi']."</option>";
 										}
-										echo "<option value='".$dt_pil['id_organisasi']."' $select>".$dt_pil['nama_organisasi']."</option>";
 									}
 								?>
                             </select>
@@ -241,17 +246,17 @@ function list_data() {
                                 </select>
                             </div>
                             <div class="col-md-6 form-group">
-								<button type="button" class="btn btn-info" id="kirim" name="kirim">Cari Data</button>   								
+								<button type="button" class="btn btn-info" id="kirim" name="kirim">Cari</button>   								
                                 <!--<button type="button" class="btn btn-success mb-2" id="excel">Export Excel</button>-->
                                  <?php if ($_SESSION['km_user_input']==1) { ?>
-                            	 <button type="button" class="btn btn-primary" id="tambah">Tambah Data</button><!--
+                            	 <button type="button" class="btn btn-primary" id="tambah">Tambah</button><!--
                             	 <button type="button" class="btn btn-success" id="upload">Upload Data</button>-->
                                  <?php } ?> 
                                  <?php if ($_SESSION['km_user_edit']==1) { ?>
-                            	 <button type="button" class="btn btn-warning" id="edit">Ubah Data</button>
+                            	 <button type="button" class="btn btn-warning" id="edit">Ubah</button>
                                  <?php } ?>  
                                   <?php if ($_SESSION['km_user_delete']==1) { ?>
-                            	 <button type="button" class="btn btn-danger" id="reset">Reset Data</button>
+                            	 <button type="button" class="btn btn-danger" id="reset">Reset</button>
 								<?php } ?>
 							</div>
 						</div>
@@ -303,13 +308,18 @@ function list_data() {
 									$qry_pil = mysqli_query($conn,"select id_organisasi, nama_organisasi 
 																from p_organisasi order by nama_organisasi");
 									while ($dt_pil = mysqli_fetch_array($qry_pil)) {
+										$idg = $dt_pil['id_organisasi'];
+										$profil_arr = get_profilorg($idg);
+		
+										if ($profil_arr['tampil']==1) {
 										$pos = strpos(str_replace(" ","",strtoupper($dt_pil['nama_organisasi'])),"EVP TReg");
-										if ($pos===false) {
-											$select = "";
-										} else {
-											$select = "selected";
+											if ($pos===false) {
+												$select = "";
+											} else {
+												$select = "selected";
+											}
+											echo "<option value='".$dt_pil['id_organisasi']."' $select>".$dt_pil['nama_organisasi']."</option>";
 										}
-										echo "<option value='".$dt_pil['id_organisasi']."' $select>".$dt_pil['nama_organisasi']."</option>";
 									}
 								?>
                             </select>
@@ -744,8 +754,10 @@ function input_data() {
 			</div>  		
 		
         	<?php } else { 
-				$user_profil_arr = get_profiluser();
-				$id_organisasi_user = $user_profil_arr['organisasi'];
+				//$user_profil_arr = get_profiluser();
+				//$id_organisasi_user = $user_profil_arr['organisasi'];
+				$userorg_arr = get_profiluserorg();
+				
 			?>
             
             <div class="row">
@@ -764,7 +776,7 @@ function input_data() {
 														inner join p_group b on a.id_group = b.id_group
 														left join (select realisasi, id_organisasi
 														from kpi_realisasi $where) c on a.id_organisasi = c.id_organisasi
-														where a.id_organisasi = '".$id_organisasi_user."'
+														where a.id_organisasi in (".$userorg_arr.")
 														order by a.nama_organisasi
 														");
 																		
@@ -772,7 +784,7 @@ function input_data() {
 								$qry_pil = mysqli_query($conn,"select a.id_organisasi, a.nama_organisasi, '0' realisasi
 														from p_organisasi a
 														inner join p_group b on a.id_group = b.id_group
-														where a.id_organisasi = '".$id_organisasi_user."'
+														where a.id_organisasi in (".$userorg_arr.")
 														order by a.nama_organisasi
 														");
 						
@@ -833,6 +845,7 @@ function edit_data() {
 	}
 
 	$menu_arr = cek_priuser($_REQUEST['fl']);
+	$userorg_arr = get_profiluserorg();
 	
 	if ($_SESSION['km_profil']==1) {
 		$where_unit = "";
@@ -842,7 +855,7 @@ function edit_data() {
 		$where_unit = " and id_unit = '".$user_profil_arr['unit']."' ";
 		$where_organisasi = " where a.id_organisasi = '".$user_profil_arr['organisasi']."'";
 	}
-			
+	$where_organisasi = " where a.id_organisasi in (".$userorg_arr.") ";		
 	
 	if (!empty($_REQUEST['kpi']) and !empty($_REQUEST['periode']) and !empty($_REQUEST['tahun']) and !empty($_REQUEST['organisasi']) and !empty($_REQUEST['tahun'])  and !empty($_REQUEST['status'])) {
 		$qry = mysqli_query($conn,"select realisasi from kpi_realisasi where id_kpi = '".$_REQUEST['kpi']."'
@@ -940,6 +953,7 @@ function edit_data() {
                        		 <select name="organisasi" id="organisasi" class="form-control">
                              	<option value="">Pilih</option>
                             	<?php 
+									
 									$qry_pil = mysqli_query($conn,"select a.id_organisasi, a.nama_organisasi 
 																from p_organisasi a
 																".$where_organisasi."

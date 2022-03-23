@@ -52,7 +52,8 @@ function child($id_bsc_perspective, $parent, $i, $menu_arr){
 	$stmt = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(a.tgl_input,'%d-%m-%Y') tgl_input, a.rumus, a.parent, a.urutan, a.satuan,
 			a.id_bsc_perspective, c.nama_bsc_perspective, case a.terbalik when '1' then 'Ya' else 'Tidak' end terbalik2, a.terbalik,
 			case a.realisasi when '1' then 'Score/Bobot' when '2' then 'Rata2 dibawahnya' when '3' then 'Penjumlahan dibawahnya' else 'Inputan' end realisasi2, 
-			a.realisasi,  case a.score when '1' then 'Penjumlahan dibawahnya' else 'Cap/Bobot' end score2, a.score
+			a.realisasi,  case a.score when '1' then 'Penjumlahan dibawahnya' else 'Cap/Bobot' end score2, a.score,
+				case a.status when '1' then 'Aktif' else 'Tidak Aktif' end status2,  a.status
 			from kpi a
 			left join user_app b on a.id_user_input = b.id_user
 			left join p_bsc_perspective c on a.id_bsc_perspective = c.id_bsc_perspective
@@ -72,6 +73,7 @@ function child($id_bsc_perspective, $parent, $i, $menu_arr){
 			<td align="center"><?php echo $row['realisasi2']; ?></td>
 			<td align="center"><?php echo $row['score2']; ?></td>
 			<td align="center"><?php echo $row['urutan']; ?></td>
+			<td align="center"><?php echo $row['status2']; ?></td>
 			<!--<td align="center"><?php echo $row['nama']; ?></td>
 			<td align="center"><?php echo $row['tgl_input']; ?></td>-->
              <?php if ($_SESSION['km_user_input']==1 or $_SESSION['km_user_edit']==1 or $_SESSION['km_user_delete']==1) { ?>
@@ -79,10 +81,10 @@ function child($id_bsc_perspective, $parent, $i, $menu_arr){
             <?php if ($_SESSION['km_user_input']==1) { ?>
             <a href='#' <?php echo "onClick='inputdata(\"".$id_bsc_perspective."\",\"".$row['id_kpi']."\");'"; ?>><img src='img/add.png' title='Tambah'></a>&nbsp;&nbsp;&nbsp;<?php } ?>
             <?php if ($_SESSION['km_user_edit']==1) { ?>
-             <a href='#' <?php echo "onClick='editdata(\"".enkripsi($row['id_kpi'])."\", \"".$id_bsc_perspective."\",\"".$row['parent']."\", \"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\");'"; ?>><img src='img/pencil-icon.png' title='Ubah'></a>&nbsp;&nbsp;&nbsp;
+             <a href='#' <?php echo "onClick='editdata(\"".enkripsi($row['id_kpi'])."\", \"".$id_bsc_perspective."\",\"".$row['parent']."\", \"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\", \"".$row['status']."\");'"; ?>><img src='img/pencil-icon.png' title='Ubah'></a>&nbsp;&nbsp;&nbsp;
 <?php } ?>
 		<?php if ($_SESSION['km_user_delete']==1) { ?>
-             <a href='#' <?php echo "onClick='hapusdata(\"".enkripsi($row['id_kpi'])."\", \"".$id_bsc_perspective."\",\"".$row['parent']."\",\"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\");'"; ?>><img src='img/cross-icon.png' title='Hapus'></a></td>
+             <a href='#' <?php echo "onClick='hapusdata(\"".enkripsi($row['id_kpi'])."\", \"".$id_bsc_perspective."\",\"".$row['parent']."\",\"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\", \"".$row['status']."\");'"; ?>><img src='img/cross-icon.png' title='Hapus'></a></td>
 			<?php } ?>
 		</tr>    
         	<?php } ?>       
@@ -142,6 +144,7 @@ function list_data(){
                 <th width="10%"><b>Realisasi</b></th>
                 <th width="10%"><b>Score</b></th>
                 <th width="5%"><b>Urutan</b></th>
+                <th width="5%"><b>Status</b></th>
                <!-- <th width="10%"><b>User Input</b></th>
                 <th width="10%"><b>Tgl Input</b></th>-->
                 <?php if ($_SESSION['km_user_input']==1 or $_SESSION['km_user_edit']==1 or $_SESSION['km_user_delete']==1) { ?>
@@ -165,6 +168,7 @@ function list_data(){
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                    <!-- <td></td>
                     <td></td>-->
                       <?php if ($_SESSION['km_user_input']==1 or $_SESSION['km_user_edit']==1 or $_SESSION['km_user_delete']==1) { ?>
@@ -180,7 +184,8 @@ function list_data(){
 			   			IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, 
 						case a.terbalik when '1' then 'Ya' else 'Tidak' end terbalik2, a.terbalik,
 					case a.realisasi when '1' then 'Score/Bobot' when '2' then 'Rata2 dibawahnya' when '3' then 'Penjumlahan dibawahnya' else 'Inputan' end realisasi2, 
-					a.realisasi,  case a.score when '1' then 'Penjumlahan dibawahnya' else 'Cap/Bobot' end score2, a.score
+					a.realisasi,  case a.score when '1' then 'Penjumlahan dibawahnya' else 'Cap/Bobot' end score2, a.score,
+					case a.status when '1' then 'Aktif' else 'Tidak Aktif' end status2,  a.status
 						from kpi a
 						left join user_app b on a.id_user_input = b.id_user
 							where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '0'
@@ -199,6 +204,7 @@ function list_data(){
                         <td align="center"><?php echo $row['realisasi2']; ?></td>
                         <td align="center"><?php echo $row['score2']; ?></td>
 						<td align="center"><?php echo $row['urutan']; ?></td>
+						<td align="center"><?php echo $row['status2']; ?></td>
 						<!--<td align="center"><?php echo $row['nama']; ?></td>
 						<td align="center"><?php echo $row['tgl_input']; ?></td>-->
                           <?php if ($_SESSION['km_user_input']==1 or $_SESSION['km_user_edit']==1 or $_SESSION['km_user_delete']==1) { ?>
@@ -208,10 +214,10 @@ function list_data(){
                                 <img src='img/add.png' title='Tambah'></a>&nbsp;&nbsp;&nbsp;
                             <?php } ?>
                               <?php if ($_SESSION['km_user_edit']==1) { ?>
-                              <a href='#' <?php echo "onClick='editdata(\"".enkripsi($row['id_kpi'])."\", \"".$row_bsc['id_bsc_perspective']."\",\"".$row['parent']."\", \"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\");'"; ?>><img src='img/pencil-icon.png' title='Ubah'></a>&nbsp;&nbsp;&nbsp;
+                              <a href='#' <?php echo "onClick='editdata(\"".enkripsi($row['id_kpi'])."\", \"".$row_bsc['id_bsc_perspective']."\",\"".$row['parent']."\", \"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\", \"".$row['status']."\");'"; ?>><img src='img/pencil-icon.png' title='Ubah'></a>&nbsp;&nbsp;&nbsp;
                               <?php } ?>
                                <?php if ($_SESSION['km_user_delete']==1) { ?>
-                        			<a href='#' <?php echo "onClick='hapusdata(\"".enkripsi($row['id_kpi'])."\",\"".$row_bsc['id_bsc_perspective']."\",\"".$row['parent']."\", \"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\");'"; ?>><img src='img/cross-icon.png' title='Hapus'></a>
+                        			<a href='#' <?php echo "onClick='hapusdata(\"".enkripsi($row['id_kpi'])."\",\"".$row_bsc['id_bsc_perspective']."\",\"".$row['parent']."\", \"".$row['nama_kpi']."\", \"".$row['terbalik']."\", \"".$row['urutan']."\", \"".$row['satuan']."\", \"".$row['realisasi']."\", \"".$row['score']."\", \"".$row['status']."\");'"; ?>><img src='img/cross-icon.png' title='Hapus'></a>
                         		<?php } ?>
                         </td>
                         <?php } ?>
@@ -249,9 +255,9 @@ function input_data(){
 		$msg .= "Unit  harus diisi<br>";
 	}
 	if ($msg==''){	
-		$stm = "insert into kpi (id_bsc_perspective, parent, nama_kpi, satuan, terbalik, urutan, realisasi, score, tgl_input, id_user_input, ip_input) 
+		$stm = "insert into kpi (id_bsc_perspective, parent, nama_kpi, satuan, terbalik, urutan, realisasi, score, status,  tgl_input, id_user_input, ip_input) 
 					values ('".$_POST['perspective']."', '".$_POST['parent']."', '".$_POST['nama']."', '".$_POST['satuan']."', '".$_POST['terbalik']."', 
-					'".$_POST['urutan']."', '".$_POST['realisasi']."','".$_POST['score']."', now(), '".$_SESSION['km_user']."', '".$_SERVER['REMOTE_ADDR']."') ";
+					'".$_POST['urutan']."', '".$_POST['realisasi']."','".$_POST['score']."', '".$_POST['status']."', now(), '".$_SESSION['km_user']."', '".$_SERVER['REMOTE_ADDR']."') ";
 		$qry = mysqli_query($conn,$stm);
 		
 		if($qry){
@@ -289,7 +295,7 @@ function edit_data(){
 		$qry = mysqli_query($conn,"update kpi set nama_kpi = '".$_POST['nama']."', terbalik = '".$_POST['terbalik']."', 
 									id_bsc_perspective = '".$_POST['perspective']."', parent =  '".$_POST['parent']."',
 									ip_input = '".$_SERVER['REMOTE_ADDR']."', urutan = '".$_POST['urutan']."',  satuan = '".$_POST['satuan']."', 
-									realisasi = '".$_POST['realisasi']."', score = '".$_POST['score']."',
+									realisasi = '".$_POST['realisasi']."', score = '".$_POST['score']."', status = '".$_POST['status']."',
 									tgl_input = now(), id_user_input = '".$_SESSION['km_user']."'
 								where id_kpi ='".$id."'");
 			

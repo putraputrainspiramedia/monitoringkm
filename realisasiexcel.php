@@ -126,17 +126,20 @@ $j++;
 while ($row = mysqli_fetch_array($query)){
 	$i=0;
 	$id_organisasi = $row['id_organisasi'];
+	$profil_arr = get_profilorg($id_organisasi);
 	
-	$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['nama_organisasi']);
-	$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	
-	for($ii=0;$ii<$jml_periode;$ii++) {
-		$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);
-		$tot[$ii] = $tot[$ii] + $nilai;	
-		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, number_format($nilai,2,",","."));
+	if ($profil_arr['tampil']==1) {		
+		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['nama_organisasi']);
 		$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	}	
-	$j++;
+		
+		for($ii=0;$ii<$jml_periode;$ii++) {
+			$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);
+			$tot[$ii] = $tot[$ii] + $nilai;	
+			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, number_format($nilai,2,",","."));
+			$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+		}	
+		$j++;
+	}
 }
 
 $i=0;
@@ -182,18 +185,22 @@ $j++;
 $tot = array();
 while ($row = mysqli_fetch_array($query)){
 	$i=0;
-	$id_organisasi = $row['id_organisasi'];
+	$id_organisasi = $row['id_organisasi'];	
+	$profil_arr = get_profilorg($id_organisasi);
 	
-	$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['nama_organisasi']);
-	$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	
-	for($ii=0;$ii<$jml_periode;$ii++) {
-		$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);
-		$tot2[$ii] = $tot2[$ii] + $nilai;	
-		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, number_format($nilai,2,",","."));
+	if ($profil_arr['tampil']==1) {
+		
+		$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, $row['nama_organisasi']);
 		$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
-	}	
-	$j++;
+		
+		for($ii=0;$ii<$jml_periode;$ii++) {
+			$nilai = hitungreal($id_organisasi, $id_status, $tahun, $arr_periode[$ii], $id_kpi);
+			$tot2[$ii] = $tot2[$ii] + $nilai;	
+			$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($i, $j, number_format($nilai,2,",","."));
+			$objPHPExcel->getActiveSheet()->getColumnDimensionByColumn($i)->setAutoSize(true);		$i++;
+		}	
+		$j++;
+	}
 }
 
 $i=0;

@@ -26,6 +26,10 @@ function list_data() {
 
 		<?php if ($_SESSION['km_user_delete']==1) { ?>
 		function hapusdata(id, username, nama, idprofil, idunit, idorganisasi){
+			
+			//$("#frm").find('select').prop('selectedIndex', -1); 
+			//$("#organisasi").multiselect('refresh'); 
+						
 			$("#hapus2").show();
 			$("#simpan").hide();
 			$("#id").val(id);
@@ -58,7 +62,16 @@ function list_data() {
 		<?php }
 		
 		if ($_SESSION['km_user_edit']==1) { ?>
-		function editdata(id, username, nama, idprofil, idunit, idorganisasi){				
+		function editdata(id, username, nama, idprofil, idunit, idorganisasi){	
+			//$("#frm").find('select').prop('selectedIndex', -1); 
+			//$('#organisasi').val(null).trigger('change');
+			//$(".select2").select2("val", "");
+			//$("#organisasi").val('').trigger('change');
+			//$('#organisasi option').each(function() {
+		//			$('#organisasi').removeAttr("selected");
+		//			$("#organisasi").val("");
+		//	});
+			
 			$("#hapus2").hide();
 			$("#simpan").show();
 			$("#id").val(id);
@@ -73,12 +86,19 @@ function list_data() {
 					$("#unit").val(idunit);
 				}
 			});
+			//alert(idorganisasi);
+			var org_arr = idorganisasi.split("_");			
 			$('#organisasi option').each(function() {
-				if($(this).val() == idorganisasi) {
-					$('#organisasi').prop("selected", true);
-					$("#organisasi").val(idorganisasi);
+				for (var i=0;i<org_arr.length;i++) {
+					//alert(org_arr[i]);
+					var isi = org_arr[i];
+					if($(this).val() == isi) {
+						$('#organisasi').prop("selected", true);
+						$("#organisasi").val(isi);
+					}
 				}
 			});
+			
 			$('#profil option').each(function() {
 				if($(this).val() == idprofil) {
 					$('#profil').prop("selected", true);
@@ -95,6 +115,8 @@ function list_data() {
 		 
 		//var table = $('#datable_1').DataTable();
 		$(document).ready(function(){
+			
+			$('.select2').select2();
 			var dtTable = $('#datable_1').DataTable();		
 			dtTable.destroy();
 			
@@ -160,6 +182,8 @@ function list_data() {
 				$("#nama").val('');
 				$('#organisasi').val('');
 				$('#unit').val('');
+				$('#organisasi').val('');
+				$('#pass').val('');
 				$("#hapus2").hide();
 				$("#simpan").show();
 				$('.modal-title').html('Input User');
@@ -179,16 +203,24 @@ function list_data() {
 				var username =  $("#username").val();
 				var pass =  $("#pass").val();
 				var profil =  $('#profil option:selected').val();
-				var organisasi =  $('#organisasi option:selected').val();
+				//var organisasi =  $('#organisasi option:selected').val();
 				var munit =  $('#unit option:selected').val();
+								
+				var organisasi = [];
+				$.each($("#organisasi option:selected"), function(){            
+					organisasi.push($(this).val());
+				});
+				//alert("You have selected the country - " + organisasi.join(","));
 				
 				$("#load2").fadeIn(400).html('<img src="./img/loading.gif" align="absmiddle"> <span class="loading">Loading ...</span>');
 				
 				if (id!='') {
-					var datane = 'tp=edit&nama='+nama+'&id='+id+'&profil='+profil+'&username='+username+'&pass='+pass+'&organisasi='+organisasi+'&unit='+munit;
+					var datane = 'tp=edit&nama='+nama+'&id='+id+'&profil='+profil+'&username='+username+'&pass='+pass+'&organisasi='+organisasi.join(",")+'&unit='+munit;
 				} else {
-					var datane = 'tp=input&nama='+nama+'&profil='+profil+'&username='+username+'&pass='+pass+'&organisasi='+organisasi+'&unit='+munit;
+					var datane = 'tp=input&nama='+nama+'&profil='+profil+'&username='+username+'&pass='+pass+'&organisasi='+organisasi.join(",")+'&unit='+munit;
 				}
+				
+				
 				$.ajax({
 					type	: "POST",
 					url		: "userdata.php",
@@ -261,9 +293,11 @@ function list_data() {
 						$('#unit').val('');
 						$('#InputModalForms').modal('hide');
 						$("#load2").fadeOut('fast');
+						//$("#frm").find('select').prop('selectedIndex', -1); 
+						//$("#organisasi").multiselect('refresh'); 
 					}
 				});
-			
+				
        		});
 			<?php
 			}
@@ -344,7 +378,7 @@ function list_data() {
 						$('#organisasi').val('');
 						$('#unit').val('');
 						$('#InputModalForms').modal('hide');
-						$("#load2").fadeOut('fast');
+						$("#load2").fadeOut('fast');                
 					}
 				});
 			
@@ -406,7 +440,7 @@ function list_data() {
                     <h5 class="modal-title"></h5>
                 </div>
                 <div class="modal-body">
-                	<form method="post" enctype="multipart/form-data">
+                	<form method="post" enctype="multipart/form-data" id="frm">
             			<input type="hidden" name="id" id="id" value="" readonly="readonly" />
                         
                          <div class="form-group">
@@ -436,9 +470,8 @@ function list_data() {
                        </div>
                         <div class="form-group">
                             <label>Organisasi</label>
-                                <select name="organisasi" id="organisasi" class="form-control">
-                                    <option value="">Pilih organisasi</option>
-                                    <?php 
+                                 <select class="select2 select2-multiple" multiple="multiple" data-placeholder="Choose" id="organisasi" name="organisasi[]" required>
+                                     <?php 
                                         $qry_pil = mysqli_query($conn,"select id_organisasi, nama_organisasi from p_organisasi order by nama_organisasi");
                                         while ($dt_pil = mysqli_fetch_array($qry_pil)) {
                                             echo "<option value='".$dt_pil['id_organisasi']."'>".$dt_pil['nama_organisasi']."</option>";

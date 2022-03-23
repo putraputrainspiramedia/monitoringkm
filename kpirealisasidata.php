@@ -71,7 +71,9 @@ function list_data(){
 		
 	</script>
     
+ 
     <br />
+    
    	<table id="datable_1" class="table table-bordered table-striped table-sm w-100">
 		<thead class="thead-primary">
             <tr align="center">
@@ -101,6 +103,7 @@ function list_data(){
 			$status = $_REQUEST['status'];
 			$id_unit = $_REQUEST['unitx'];
 			
+			$userorg_arr = get_profiluserorg();
 			setcookie("cookie_kmtelkom", $status, time()+3600); 
 			
 			$stmt_bsc = mysqli_query($conn,"select id_bsc_perspective, nama_bsc_perspective, nilai
@@ -127,7 +130,7 @@ function list_data(){
                <?php
 			   
 			   
-			   $stmt = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
+			   /*$stmt = "select a.id_kpi, a.nama_kpi, b.nama, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
 						IFNULL(a.rumus,'') rumus, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, d.id_organisasi, d.tahun, a.satuan,
 						(select count(*) from kpi x where x.parent = a.id_kpi ) jml_child
 						from kpi a
@@ -136,7 +139,17 @@ function list_data(){
 						where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '0'
 						and d.id_organisasi = '".$id_organisasi."' and d.tahun = '".$tahun."' 
 						order by a.parent, a.urutan";
+				*/
 				
+				$stmt = "select a.id_kpi, a.nama_kpi, DATE_FORMAT(d.tgl_input,'%d-%m-%Y') tgl_input, 
+						IFNULL(a.rumus,'') rumus, IFNULL(a.parent,0) parent, a.urutan, a.id_bsc_perspective, d.id_organisasi, d.tahun, a.satuan,
+						(select count(*) from kpi x where x.parent = a.id_kpi ) jml_child
+						from kpi a
+						inner join kpi_organisasi d on a.id_kpi = d.id_kpi						
+						where a.id_kpi is not null and a.id_bsc_perspective = '".$row_bsc['id_bsc_perspective']."' and a.parent = '0'
+						and d.id_organisasi = '".$id_organisasi."'  and d.tahun = '".$tahun."' 
+						order by a.parent, a.urutan";
+						
 				//echo "<pre>$stmt</pre>";
 				$query = mysqli_query($conn,$stmt);
 				
@@ -540,12 +553,14 @@ function inputform_data(){
 		while ($dt_pil = mysqli_fetch_array($qry_pil)) {
 			$id_organisasi = $dt_pil['id_organisasi'];
 			
-			$realisasi = str_replace(",",".",str_replace(".","",$_POST['realisasi_'.$id_organisasi]));				
-			$stm = "insert into kpi_realisasi (id_kpi, id_organisasi, realisasi, id_status, id_unit, 
-					tahun, id_periode,tgl_input, id_user_input, ip_input) 
-					values ('".$_REQUEST['kpi']."', '".$id_organisasi."', '".$realisasi."', '".$_REQUEST['status']."', '".$_REQUEST['unit']."',
-					'".$_REQUEST['tahun']."', '".$_REQUEST['periode']."',now(), '".$_SESSION['km_user']."', '".$_SERVER['REMOTE_ADDR']."') ";
-			$qry = mysqli_query($conn,$stm);
+			$realisasi = str_replace(",",".",str_replace(".","",$_POST['realisasi_'.$id_organisasi]));	
+			if ($realisasi!=0){			
+				$stm = "insert into kpi_realisasi (id_kpi, id_organisasi, realisasi, id_status, id_unit, 
+						tahun, id_periode,tgl_input, id_user_input, ip_input) 
+						values ('".$_REQUEST['kpi']."', '".$id_organisasi."', '".$realisasi."', '".$_REQUEST['status']."', '".$_REQUEST['unit']."',
+						'".$_REQUEST['tahun']."', '".$_REQUEST['periode']."',now(), '".$_SESSION['km_user']."', '".$_SERVER['REMOTE_ADDR']."') ";
+				$qry = mysqli_query($conn,$stm);
+			}
 		}	
 		
 		if($qry){
@@ -592,16 +607,16 @@ function edit_data(){
 										where id_organisasi = '".$_REQUEST['organisasi']."' and tahun = '".$_REQUEST['tahun']."'
 										and id_status = '".$_REQUEST['status']."' and id_unit = '".$_REQUEST['unit']."'
 										and id_periode = '".$_REQUEST['periode']."' and id_kpi = '".$_REQUEST['kpi']."' ");
-	
-		
-		$stm = "insert into kpi_realisasi (id_kpi, id_organisasi, id_unit, realisasi, tahun, id_periode, id_status,
-					tgl_input, id_user_input, ip_input) 
-					values ('".$_REQUEST['kpi']."', '".$_REQUEST['organisasi']."', '".$_REQUEST['unit']."', 
-					'".str_replace(",",".",str_replace(".","",$_REQUEST['realisasi']))."',
-					'".$_REQUEST['tahun']."', '".$_REQUEST['periode']."', '".$_REQUEST['status']."',
-					now(), '".$_SESSION['km_user']."', '".$_SERVER['REMOTE_ADDR']."') ";
-		$qry = mysqli_query($conn,$stm);
-		
+		$realisasi = $_POST['realisasi'];	
+		if ($realisasi!=0){			
+			$stm = "insert into kpi_realisasi (id_kpi, id_organisasi, id_unit, realisasi, tahun, id_periode, id_status,
+						tgl_input, id_user_input, ip_input) 
+						values ('".$_REQUEST['kpi']."', '".$_REQUEST['organisasi']."', '".$_REQUEST['unit']."', 
+						'".str_replace(",",".",str_replace(".","",$_REQUEST['realisasi']))."',
+						'".$_REQUEST['tahun']."', '".$_REQUEST['periode']."', '".$_REQUEST['status']."',
+						now(), '".$_SESSION['km_user']."', '".$_SERVER['REMOTE_ADDR']."') ";
+			$qry = mysqli_query($conn,$stm);
+		}
 		if($qry){
 			$msg ="Sukses Tambah data";
 		}else{
@@ -616,13 +631,14 @@ function edit_data(){
 function reset_data(){
 	global $conn;
 	
-	if ($_SESSION['km_profil']==1) {
+	/*if ($_SESSION['km_profil']==1) {
 		$id_organisasi = $_REQUEST['organisasi'];
 	} else {
 		$user_profil_arr = get_profiluser();		
 		$id_organisasi = $user_profil_arr['organisasi'];
-	}
+	}*/
 	
+	$id_organisasi = $_REQUEST['organisasi'];
 	if ($_REQUEST['organisasi']==$id_organisasi) {
 		$qry = mysqli_query($conn,"delete from kpi_realisasi
 									where id_organisasi = '".$_REQUEST['organisasi']."' and tahun = '".$_REQUEST['tahun']."'

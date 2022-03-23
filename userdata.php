@@ -96,15 +96,29 @@ function list_data(){
 		$data = array();
 		$i=0;
 		while ($row = mysqli_fetch_array($query)){
+				$organisasi = "";
+				$id_organisasi = "";
 				//$data[$i]["id"] = $row['KodePr']."##".$row['Nama']."##".$row['Alamat']."##".$row['GSM']."##".base64_encode($row['KodePr']);
+				$qry_org = mysqli_query($conn,"select a.id_organisasi, a.nama_organisasi 
+												from p_organisasi a
+												inner join user_app_organisasi b on a.id_organisasi = b.id_organisasi
+												where b.id_user = '".$row['id_user']."' order by a.id_group, a.nama_organisasi");
+				while ($row_org = mysqli_fetch_array($qry_org)) {
+					$organisasi .= $row_org['nama_organisasi'].",";
+					$id_organisasi .= $row_org['id_organisasi']."_";
+				}
+				if ($organisasi!='') {
+					$organisasi = substr($organisasi,0,strlen($organisasi)-1);
+					$id_organisasi = substr($id_organisasi,0,strlen($id_organisasi)-1);
+				}
 				
 				$data[$i]["nama"] = $row['nama'];
 				$data[$i]["username"] = $row['username'];
 				$data[$i]["nama_unit"] = $row['nama_unit'];
-				$data[$i]["nama_organisasi"] = $row['nama_organisasi'];
+				$data[$i]["nama_organisasi"] = $organisasi;
 				$data[$i]["nama_profil"] = $row['nama_profil'];
 				#$data[$i]["action"] = "<a href='?fl=user&tp=edit&id=".enkripsi($row['id_user'])."'><img src='img/pencil-icon.png' title='Ubah'></a>&nbsp;<a href='?fl=user&tp=delete&id=".enkripsi($row['id_user'])."'><img src='img/cross-icon.png' title='Hapus'></a>";
-				$data[$i]["action"] = "<a href='#'  onClick='editdata(\"".enkripsi($row['id_user'])."\",\"".$row['username']."\",\"".$row['nama']."\",\"".$row['id_profil']."\",\"".$row['id_unit']."\",\"".$row['id_organisasi']."\");'><img src='img/pencil-icon.png' title='Ubah' id='edit'></a>&nbsp;&nbsp;&nbsp;<a href='#' onClick='hapusdata(\"".enkripsi($row['id_user'])."\",\"".$row['username']."\",\"".$row['nama']."\",\"".$row['id_profil']."\",\"".$row['id_unit']."\",\"".$row['id_organisasi']."\");'><img src='img/cross-icon.png' title='Hapus' id='hapus'></a>";
+				$data[$i]["action"] = "<a href='#'  onClick='editdata(\"".enkripsi($row['id_user'])."\",\"".$row['username']."\",\"".$row['nama']."\",\"".$row['id_profil']."\",\"".$row['id_unit']."\",\"".$id_organisasi."\");'><img src='img/pencil-icon.png' title='Ubah' id='edit'></a>&nbsp;&nbsp;&nbsp;<a href='#' onClick='hapusdata(\"".enkripsi($row['id_user'])."\",\"".$row['username']."\",\"".$row['nama']."\",\"".$row['id_profil']."\",\"".$row['id_unit']."\",\"".$id_organisasi."\");'><img src='img/cross-icon.png' title='Hapus' id='hapus'></a>";
 			$i++;
 		}
 	
@@ -152,7 +166,13 @@ function input_data(){
 		$qry = mysqli_query($conn,"insert into user_app (username, nama, pass, id_profil, id_unit, id_organisasi, tgl_input) 
 						values ('".$_POST['username']."','".$_POST['nama']."', '".md5(md5($_POST['pass']))."','".$_POST['profil']."',  
 						'".$_POST['unit']."','".$_POST['organisasi']."',now()) ");
+		$id_user = mysqli_insert_id($conn);
 		
+		$org_arr = explode(",",$_POST['organisasi']);
+		for ($i=0;$i<count($org_arr);$i++) {
+			$qry_org = mysqli_query($conn,"insert into user_app_organisasi (id_user, id_organisasi, tgl_input) 
+								values ('".$id_user."', '".$org_arr[$i]."',now()) ");
+		}
 		if($qry){
 			$msg .="Sukses Tambah data";
 		}else{
@@ -191,10 +211,17 @@ function edit_data(){
 			$edit_pass = "";
 		}
 		$qry = mysqli_query($conn,"update user_app set username = '".$_POST['username']."',nama = '".$_POST['nama']."', 
-							id_profil = '".$_POST['profil']."', id_unit = '".$_POST['unit']."', id_organisasi = '".$_POST['organisasi']."', 
+							id_profil = '".$_POST['profil']."', id_unit = '".$_POST['unit']."',  
 							$edit_pass tgl_input = now()
 							where id_user ='".$id."'");
-		
+							
+		$qry_org = mysqli_query($conn,"delete from user_app_organisasi where id_user= '".$id."'");
+													
+		$org_arr = explode(",",$_POST['organisasi']);
+		for ($i=0;$i<count($org_arr);$i++) {
+			$qry_org = mysqli_query($conn,"insert into user_app_organisasi (id_user, id_organisasi, tgl_input) 
+								values ('".$id."', '".$org_arr[$i]."',now()) ");
+		}
 		if($qry){
 			$msg .="Sukses edit data";
 		}else{
@@ -211,6 +238,7 @@ function edit_data(){
 function delete_data(){
 	global $conn;
 
+	$qry_org = mysqli_query($conn,"delete from user_app_organisasi where id_user= '".dekripsi($_REQUEST['id'])."'");
 	$qry = mysqli_query($conn,"delete from user_app where id_user = '".dekripsi($_REQUEST['id'])."'");
 	if($qry){
 		$msg = "sukses";

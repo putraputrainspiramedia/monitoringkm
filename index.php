@@ -35,7 +35,6 @@ if (empty($_SESSION['km_user'])) {
     <!-- select2 CSS -->
     <link href="vendors/select2/dist/css/select2.min.css" rel="stylesheet" type="text/css" />
        
-
     <!-- Pickr CSS -->
     <!--<link href="vendors/pickr-widget/dist/pickr.min.css" rel="stylesheet" type="text/css" />
 -->
@@ -129,6 +128,7 @@ if (empty($_SESSION['km_user'])) {
     <script src="vendors/select2/dist/js/select2.full.min.js"></script>
     <script src="dist/js/select2-data.js"></script>
     
+   
     <!-- Bootstrap Tagsinput JavaScript -->
     <!--<script src="vendors/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js"></script>-->
 
