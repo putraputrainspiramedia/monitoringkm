@@ -107,10 +107,8 @@ function list_data(){
 					$organisasi .= $row_org['nama_organisasi'].",";
 					$id_organisasi .= $row_org['id_organisasi']."_";
 				}
-				if ($organisasi!='') {
-					$organisasi = substr($organisasi,0,strlen($organisasi)-1);
-					$id_organisasi = substr($id_organisasi,0,strlen($id_organisasi)-1);
-				}
+				$organisasi = substr($organisasi,0,strlen($organisasi)-1);
+				$id_organisasi = substr($id_organisasi,0,strlen($id_organisasi)-1);
 				
 				$data[$i]["nama"] = $row['nama'];
 				$data[$i]["username"] = $row['username'];
